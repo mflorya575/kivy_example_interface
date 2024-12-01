@@ -147,7 +147,7 @@ class MyApp(MDApp):
         if self.texts:
             self.display_text(0)  # Отображаем первый файл по умолчанию
 
-    def display_text(self, index):
+    def display_text(self, index, instance=None):
         """
         Отображает текст выбранного файла.
         """
