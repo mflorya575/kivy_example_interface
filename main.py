@@ -5,7 +5,6 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.graphics import Color, Line
 from kivy.core.window import Window
 
 
@@ -35,10 +34,10 @@ class HoverButton(Button):
 class MyApp(App):
     def build(self):
         # Основная панель с вкладками
-        tb = TabbedPanel(do_default_tab=False, tab_pos="top_left")
+        tb = TabbedPanel(do_default_tab=False, tab_pos="top_left", tab_height=22)
 
         # Вкладка "Фрагменты"
-        fragments_tab = TabbedPanelItem(text="Фрагменты")
+        fragments_tab = TabbedPanelItem(text="Фрагменты", font_size="12sp", size_hint=(None, None), width=50, height=22)
         layout = BoxLayout(orientation="horizontal", spacing=10, padding=5)
 
         # Таблица (слева)
@@ -46,14 +45,14 @@ class MyApp(App):
         table_layout.bind(minimum_height=table_layout.setter('height'))
 
         # Добавляем заголовки
-        headers = ["Файл", "Слов", "Фрагмент"]
+        headers = ["##", "Фрагмент", "Слов"]
         for header in headers:
-            label = Label(text=header, bold=True, size_hint_y=None, height=40)
+            label = Label(text=header, size_hint_y=None, height=40, font_size="12sp")
             table_layout.add_widget(label)
 
         # Добавляем строки с реакцией на наведение
         for i in range(10):  # Пример данных
-            for col in [f"{i+1}.txt", f"{i * 100}", f"Текст {i+1}"]:
+            for col in [f"{i+1}", f"{i+1}.txt", f"{i * 100}"]:
                 btn = HoverButton(text=col, size_hint_y=None, height=30)
                 table_layout.add_widget(btn)
 
@@ -67,12 +66,12 @@ class MyApp(App):
         tb.add_widget(fragments_tab)
 
         # Вкладка "Фильтры"
-        filters_tab = TabbedPanelItem(text="Фильтры")
+        filters_tab = TabbedPanelItem(text="Фильтры", font_size="12sp", size_hint=(None, None), width=50, height=22)
         filters_tab.add_widget(Label(text="Настройка фильтров"))
         tb.add_widget(filters_tab)
 
         # Вкладка "Словарь"
-        dictionary_tab = TabbedPanelItem(text="Словарь")
+        dictionary_tab = TabbedPanelItem(text="Словарь", font_size="12sp", size_hint=(None, None), width=50, height=22)
         dictionary_tab.add_widget(Label(text="Словарь и дополнительные функции"))
         tb.add_widget(dictionary_tab)
 
