@@ -10,6 +10,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.core.window import Window
 from kivymd.uix.button import MDIconButton
+from kivymd.uix.tooltip import MDTooltip
 
 
 class HoverButton(Button):
@@ -35,6 +36,10 @@ class HoverButton(Button):
             self.background_color = self.default_color
 
 
+class IconButtonWithTooltip(MDIconButton, MDTooltip):
+    pass
+
+
 class MyApp(MDApp):
     def build(self):
         # Основная панель с вкладками
@@ -46,10 +51,10 @@ class MyApp(MDApp):
 
         # Используем StackLayout для кнопок
         buttons_layout = StackLayout(orientation="lr-tb", size_hint_y=None, height=40)
-        button1 = MDIconButton(icon="folder-multiple-plus", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp")
-        button2 = MDIconButton(icon="content-save", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp")
-        button3 = MDIconButton(icon="checkbox-marked-circle-outline", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp")
-        button4 = MDIconButton(icon="checkbox-marked-circle-minus-outline", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp")
+        button1 = IconButtonWithTooltip(icon="folder-multiple-plus", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp", tooltip_text="Добавить текстов")
+        button2 = IconButtonWithTooltip(icon="content-save", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp", tooltip_text="Сохранить изменения")
+        button3 = IconButtonWithTooltip(icon="checkbox-marked-circle-outline", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp", tooltip_text="Отметить всё")
+        button4 = IconButtonWithTooltip(icon="checkbox-marked-circle-minus-outline", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp", tooltip_text="Обратить отмеченное")
 
         buttons_layout.add_widget(button1)
         buttons_layout.add_widget(button2)
