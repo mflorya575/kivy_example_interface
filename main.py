@@ -1,4 +1,5 @@
 from kivy.app import App
+from kivy.uix.stacklayout import StackLayout
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
@@ -38,7 +39,23 @@ class MyApp(App):
 
         # Вкладка "Фрагменты"
         fragments_tab = TabbedPanelItem(text="Фрагменты", font_size="12sp", size_hint=(None, None), width=50, height=22)
-        layout = BoxLayout(orientation="horizontal", spacing=10, padding=5)
+        layout = BoxLayout(orientation="vertical", spacing=10, padding=5)
+
+        # Используем StackLayout для кнопок
+        buttons_layout = StackLayout(orientation="lr-tb", size_hint_y=None, height=40)
+        button1 = Button(text="Кнопка 1", font_size="11sp", size_hint=(None, None), width=50, height=22)
+        button2 = Button(text="Кнопка 2", font_size="11sp", size_hint=(None, None), width=50, height=22)
+        button3 = Button(text="Кнопка 3", font_size="11sp", size_hint=(None, None), width=50, height=22)
+
+        buttons_layout.add_widget(button1)
+        buttons_layout.add_widget(button2)
+        buttons_layout.add_widget(button3)
+
+        # Добавляем кнопки в layout
+        layout.add_widget(buttons_layout)
+
+        # Создаем BoxLayout с горизонтальной ориентацией для размещения таблицы и текстового поля рядом
+        main_layout = BoxLayout(orientation="horizontal", spacing=10)
 
         # Таблица (слева)
         table_layout = GridLayout(cols=3, size_hint=(0.3, 1), spacing=0)
@@ -47,21 +64,24 @@ class MyApp(App):
         # Добавляем заголовки
         headers = ["##", "Фрагмент", "Слов"]
         for header in headers:
-            label = Label(text=header, size_hint_y=None, height=40, font_size="12sp")
+            label = Label(text=header, size_hint_y=None, height=20, font_size="12sp")
             table_layout.add_widget(label)
 
         # Добавляем строки с реакцией на наведение
-        for i in range(10):  # Пример данных
-            for col in [f"{i+1}", f"{i+1}.txt", f"{i * 100}"]:
-                btn = HoverButton(text=col, size_hint_y=None, height=30)
+        for i in range(10):
+            for col in [f"{i + 1}", f"{i + 1}.txt", f"{i * 100}"]:
+                btn = HoverButton(text=col, size_hint_y=None, height=20)
                 table_layout.add_widget(btn)
 
         # Область текста (справа)
-        text_area = TextInput(text="Выберите файл, чтобы увидеть текст", multiline=True, size_hint=(0.7, 1))
+        text_area = TextInput(text="Нет текста", multiline=True, size_hint=(0.8, 1))
 
-        # Добавляем таблицу и текстовую область
-        layout.add_widget(table_layout)
-        layout.add_widget(text_area)
+        # Добавляем таблицу и текстовую область в основной лэйаут
+        main_layout.add_widget(table_layout)
+        main_layout.add_widget(text_area)
+
+        # Добавляем основной лэйаут и кнопки во вкладку
+        layout.add_widget(main_layout)
         fragments_tab.add_widget(layout)
         tb.add_widget(fragments_tab)
 
@@ -80,4 +100,3 @@ class MyApp(App):
 
 if __name__ == "__main__":
     MyApp().run()
-
