@@ -1,12 +1,15 @@
-from kivy.app import App
+from kivymd.app import MDApp
+
 from kivy.uix.stacklayout import StackLayout
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
+
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.core.window import Window
+from kivymd.uix.button import MDIconButton
 
 
 class HoverButton(Button):
@@ -32,7 +35,7 @@ class HoverButton(Button):
             self.background_color = self.default_color
 
 
-class MyApp(App):
+class MyApp(MDApp):
     def build(self):
         # Основная панель с вкладками
         tb = TabbedPanel(do_default_tab=False, tab_pos="top_left", tab_height=22)
@@ -43,13 +46,15 @@ class MyApp(App):
 
         # Используем StackLayout для кнопок
         buttons_layout = StackLayout(orientation="lr-tb", size_hint_y=None, height=40)
-        button1 = Button(text="Кнопка 1", font_size="11sp", size_hint=(None, None), width=50, height=22)
-        button2 = Button(text="Кнопка 2", font_size="11sp", size_hint=(None, None), width=50, height=22)
-        button3 = Button(text="Кнопка 3", font_size="11sp", size_hint=(None, None), width=50, height=22)
+        button1 = MDIconButton(icon="folder-multiple-plus", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp")
+        button2 = MDIconButton(icon="content-save", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp")
+        button3 = MDIconButton(icon="checkbox-marked-circle-outline", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp")
+        button4 = MDIconButton(icon="checkbox-marked-circle-minus-outline", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp")
 
         buttons_layout.add_widget(button1)
         buttons_layout.add_widget(button2)
         buttons_layout.add_widget(button3)
+        buttons_layout.add_widget(button4)
 
         # Добавляем кнопки в layout
         layout.add_widget(buttons_layout)
