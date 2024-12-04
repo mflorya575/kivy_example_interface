@@ -1,5 +1,6 @@
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
 
 from kivy.uix.stacklayout import StackLayout
@@ -54,22 +55,50 @@ class IconButtonWithTooltip(MDIconButton, MDTooltip):
 class MyApp(MDApp):
     def build(self):
         self.texts = []
-        self.text_area = TextInput(text="Нет текста", multiline=True, size_hint=(0.8, 1))
+        self.text_area = TextInput(
+            text="Нет текста", multiline=True, size_hint=(0.8, 1)
+        )
 
         # Основная панель с вкладками
         tb = TabbedPanel(do_default_tab=False, tab_pos="top_left", tab_height=22)
 
         # Вкладка "Фрагменты"
-        fragments_tab = TabbedPanelItem(text="Фрагменты", font_size="12sp", size_hint=(None, None), width=50, height=22)
+        fragments_tab = TabbedPanelItem(
+            text="Фрагменты", font_size="12sp", size_hint=(None, None), width=50, height=22
+        )
         layout = BoxLayout(orientation="vertical", spacing=10, padding=5)
 
         # Используем StackLayout для кнопок
         buttons_layout = StackLayout(orientation="lr-tb", size_hint_y=None, height=40)
-        button1 = IconButtonWithTooltip(icon="folder-multiple-plus", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp", tooltip_text="Добавить текстов")
-        button2 = IconButtonWithTooltip(icon="content-save", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp", tooltip_text="Сохранить изменения")
+        button1 = IconButtonWithTooltip(
+            icon="folder-multiple-plus",
+            icon_color=(0.5, 0.5, 1, 1),
+            md_bg_color="#35C0CD",
+            icon_size="10dp",
+            tooltip_text="Добавить текстов",
+        )
+        button2 = IconButtonWithTooltip(
+            icon="content-save",
+            icon_color=(0.5, 0.5, 1, 1),
+            md_bg_color="#35C0CD",
+            icon_size="10dp",
+            tooltip_text="Сохранить изменения",
+        )
         button1.bind(on_release=self.open_file_dialog)
-        button3 = IconButtonWithTooltip(icon="checkbox-marked-circle-outline", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp", tooltip_text="Отметить всё")
-        button4 = IconButtonWithTooltip(icon="checkbox-marked-circle-minus-outline", icon_color=(0.5, 0.5, 1, 1), md_bg_color='#35C0CD', icon_size="10dp", tooltip_text="Обратить отмеченное")
+        button3 = IconButtonWithTooltip(
+            icon="checkbox-marked-circle-outline",
+            icon_color=(0.5, 0.5, 1, 1),
+            md_bg_color="#35C0CD",
+            icon_size="10dp",
+            tooltip_text="Отметить всё",
+        )
+        button4 = IconButtonWithTooltip(
+            icon="checkbox-marked-circle-minus-outline",
+            icon_color=(0.5, 0.5, 1, 1),
+            md_bg_color="#35C0CD",
+            icon_size="10dp",
+            tooltip_text="Обратить отмеченное",
+        )
 
         buttons_layout.add_widget(button1)
         buttons_layout.add_widget(button2)
@@ -82,6 +111,10 @@ class MyApp(MDApp):
         # Основной лэйаут с таблицей и текстовым полем
         main_layout = BoxLayout(orientation="horizontal", spacing=10)
         self.table_layout = GridLayout(cols=3, size_hint=(0.3, 1), spacing=5)
+
+        # Устанавливаем начальные данные в таблице
+        self.initialize_table()
+
         main_layout.add_widget(self.table_layout)
         main_layout.add_widget(self.text_area)
 
@@ -90,17 +123,34 @@ class MyApp(MDApp):
         tb.add_widget(fragments_tab)
 
         # Вкладка "Фильтры"
-        filters_tab = TabbedPanelItem(text="Фильтры", font_size="12sp", size_hint=(None, None), width=50, height=22)
+        filters_tab = TabbedPanelItem(
+            text="Фильтры", font_size="12sp", size_hint=(None, None), width=50, height=22
+        )
         filters_tab.add_widget(Label(text="Настройка фильтров"))
         tb.add_widget(filters_tab)
 
         # Вкладка "Словарь"
-        dictionary_tab = TabbedPanelItem(text="Словарь", font_size="12sp", size_hint=(None, None), width=50, height=22)
+        dictionary_tab = TabbedPanelItem(
+            text="Словарь", font_size="12sp", size_hint=(None, None), width=50, height=22
+        )
         dictionary_tab.add_widget(Label(text="Словарь и дополнительные функции"))
         tb.add_widget(dictionary_tab)
 
         return tb
 
+    def initialize_table(self):
+        """
+        Устанавливает начальное состояние таблицы с заголовками и значением по умолчанию.
+        """
+        # Заголовки таблицы
+        headers = ["##", "Фрагмент", "Слов"]
+        for header in headers:
+            self.table_layout.add_widget(Label(text=header, size_hint_y=None, height=20, font_size="12sp"))
+
+        # Добавляем начальную строку с данными
+        self.table_layout.add_widget(Label(text="0", size_hint_y=None, height=20))
+        self.table_layout.add_widget(Label(text="Файл", size_hint_y=None, height=20))
+        self.table_layout.add_widget(Label(text="2", size_hint_y=None, height=20))
 
     ############################ Загрузка файлов ################################
     def open_file_dialog(self, instance):
@@ -108,7 +158,7 @@ class MyApp(MDApp):
         Открывает диалог выбора файлов с поддержкой множественного выбора.
         """
         file_chooser = FileChooserIconView(filters=["*.txt"], multiselect=True)
-        popup_content = BoxLayout(orientation='vertical')
+        popup_content = BoxLayout(orientation="vertical")
         popup_content.add_widget(file_chooser)
 
         # Создаем кнопку для подтверждения выбора файлов
@@ -158,10 +208,6 @@ class MyApp(MDApp):
 
             except Exception as e:
                 self.text_area.text = f"Ошибка при загрузке файла {file_path}: {e}"
-
-        # Отображаем текст первого файла, если он есть
-        if self.texts:
-            self.display_text(0)  # Отображаем первый файл по умолчанию
 
     def display_text(self, index, instance=None):
         """
