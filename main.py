@@ -57,7 +57,7 @@ class MyApp(MDApp):
     def build(self):
         self.texts = []
         self.text_area = TextInput(
-            text="Нет текста", multiline=True, size_hint=(0.8, 1)
+            text="Нет текста", multiline=True, size_hint=(0.8, 1), readonly=True
         )
 
         # Основная панель с вкладками
@@ -101,6 +101,7 @@ class MyApp(MDApp):
             icon_size="10dp",
             tooltip_text="Обратить отмеченное",
         )
+        button4.bind(on_release=self.disable_all_checkboxes)
 
         buttons_layout.add_widget(button1)
         buttons_layout.add_widget(button2)
@@ -245,6 +246,14 @@ class MyApp(MDApp):
         for child in self.table_layout.children:
             if isinstance(child, CheckBox):
                 child.active = True  # Устанавливаем активное состояние для чекбоксов
+
+    def disable_all_checkboxes(self, instance):
+        """
+        Убирает отметки всех чекбоксов в таблице.
+        """
+        for child in self.table_layout.children:
+            if isinstance(child, CheckBox):
+                child.active = False  # Устанавливаем НЕактивное состояние для чекбоксов
 
     #############################################################################
 
