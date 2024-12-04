@@ -101,11 +101,19 @@ class MyApp(MDApp):
             tooltip_text="Обратить отмеченное",
         )
         button4.bind(on_release=self.disable_all_checkboxes)
+        button5 = IconButtonWithTooltip(
+            icon="code-brackets",
+            icon_color=(0.5, 0.5, 1, 1),
+            md_bg_color="#e33d3d",
+            icon_size="10dp",
+            tooltip_text="Разделить текст",
+        )
 
         buttons_layout.add_widget(button1)
         buttons_layout.add_widget(button2)
         buttons_layout.add_widget(button3)
         buttons_layout.add_widget(button4)
+        buttons_layout.add_widget(button5)
 
         # Добавляем кнопки в layout
         layout.add_widget(buttons_layout)
@@ -154,7 +162,7 @@ class MyApp(MDApp):
 
         # Добавляем начальную строку с данными
         self.table_layout.add_widget(Label(text="0", size_hint_y=None, height=20))
-        self.table_layout.add_widget(Label(text="Файл", size_hint_y=None, height=20))
+        self.table_layout.add_widget(Label(text="Пустой", size_hint_y=None, height=20))
         self.table_layout.add_widget(Label(text="2", size_hint_y=None, height=20))
         self.table_layout.add_widget(CheckBox(size_hint_y=None, height=20))
     #############################################################################
