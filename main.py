@@ -18,7 +18,9 @@ from functools import partial
 
 
 class HoverButton(Button):
-    """Кнопка с изменением цвета при наведении."""
+    """
+    Кнопка с изменением цвета при наведении.
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.background_normal = ''  # Убираем дефолтный фон
@@ -30,7 +32,9 @@ class HoverButton(Button):
         Window.bind(mouse_pos=self.on_mouse_pos)
 
     def on_mouse_pos(self, *args):
-        """Отслеживаем позицию мыши."""
+        """
+        Отслеживаем позицию мыши.
+        """
         if not self.get_parent_window():
             return
         pos = args[1]
@@ -41,6 +45,9 @@ class HoverButton(Button):
 
 
 class IconButtonWithTooltip(MDIconButton, MDTooltip):
+    """
+    Класс кастомной кнопки для отображения текста при наведении на кнопку.
+    """
     pass
 
 
@@ -94,6 +101,8 @@ class MyApp(MDApp):
 
         return tb
 
+
+    ############################ Загрузка файлов ################################
     def open_file_dialog(self, instance):
         """
         Открывает диалог выбора файлов с поддержкой множественного выбора.
@@ -153,6 +162,7 @@ class MyApp(MDApp):
         """
         file_path, text = self.texts[index]
         self.text_area.text = f"Файл: {file_path}\n\n{text}"
+    #############################################################################
 
 
 if __name__ == "__main__":
