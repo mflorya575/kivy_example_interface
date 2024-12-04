@@ -1,5 +1,7 @@
+from kivy.uix.checkbox import CheckBox
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
 
 from kivy.uix.stacklayout import StackLayout
@@ -109,7 +111,7 @@ class MyApp(MDApp):
 
         # Основной лэйаут с таблицей и текстовым полем
         main_layout = BoxLayout(orientation="horizontal", spacing=10)
-        self.table_layout = GridLayout(cols=3, size_hint=(0.3, 1), spacing=5)
+        self.table_layout = GridLayout(cols=4, size_hint=(0.4, 1), spacing=5)
 
         # Устанавливаем начальные данные в таблице
         self.initialize_table()
@@ -137,12 +139,15 @@ class MyApp(MDApp):
 
         return tb
 
+
+
+    ############################ Стартовое состояние программы ################################
     def initialize_table(self):
         """
         Устанавливает начальное состояние таблицы с заголовками и значением по умолчанию.
         """
         # Заголовки таблицы
-        headers = ["##", "Фрагмент", "Слов"]
+        headers = ["##", "Фрагмент", "Слов", "Выбрать"]
         for header in headers:
             self.table_layout.add_widget(Label(text=header, size_hint_y=None, height=20, font_size="12sp"))
 
@@ -150,6 +155,10 @@ class MyApp(MDApp):
         self.table_layout.add_widget(Label(text="0", size_hint_y=None, height=20))
         self.table_layout.add_widget(Label(text="Файл", size_hint_y=None, height=20))
         self.table_layout.add_widget(Label(text="2", size_hint_y=None, height=20))
+        self.table_layout.add_widget(CheckBox(size_hint_y=None, height=20))
+    #############################################################################
+
+
 
     ############################ Загрузка файлов ################################
     def open_file_dialog(self, instance):
@@ -179,10 +188,11 @@ class MyApp(MDApp):
         self.table_layout.clear_widgets()  # Очищаем таблицу
 
         # Заголовки таблицы
-        headers = ["##", "Фрагмент", "Слов"]
+        headers = ["##", "Фрагмент", "Слов", "Выбрать"]
         for header in headers:
             self.table_layout.add_widget(Label(text=header, size_hint_y=None, height=20, font_size="12sp"))
 
+        # Добавляем строки таблицы
         for i, file_path in enumerate(file_paths, start=1):
             try:
                 with open(file_path, 'r', encoding='utf-8') as file:
@@ -201,9 +211,14 @@ class MyApp(MDApp):
                     button = Button(text=str(i), size_hint_y=None, height=20)
                     button.bind(on_release=partial(self.display_text, i - 1))  # Передаем индекс
 
+                    # Чекбокс для выбора
+                    checkbox = CheckBox(size_hint_y=None, height=20)
+
+                    # Добавляем элементы в таблицу
                     self.table_layout.add_widget(button)
                     self.table_layout.add_widget(Label(text=fragment, size_hint_y=None, height=20))
                     self.table_layout.add_widget(Label(text=str(words_count), size_hint_y=None, height=20))
+                    self.table_layout.add_widget(checkbox)
 
             except Exception as e:
                 self.text_area.text = f"Ошибка при загрузке файла {file_path}: {e}"
@@ -216,6 +231,9 @@ class MyApp(MDApp):
         # Отображение текста в правом окне
         self.text_area.text = f"{text}"
     #############################################################################
+
+
+
 
 
 if __name__ == "__main__":
