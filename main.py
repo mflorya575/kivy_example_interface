@@ -1,7 +1,6 @@
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
-from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
 
 from kivy.uix.stacklayout import StackLayout
