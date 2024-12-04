@@ -137,16 +137,23 @@ class MyApp(MDApp):
         for i, file_path in enumerate(file_paths, start=1):
             try:
                 with open(file_path, 'r', encoding='utf-8') as file:
-                    text = file.read()
+                    text = file.read().strip()  # Убираем лишние пробелы
                     self.texts.append((file_path, text))  # Добавляем текст в список
                     words_count = len(text.split())
+
+                    # Генерация короткого имени файла для отображения
+                    file_name = file_path.split("/")[-1]  # Получаем только имя файла
+                    if len(file_name) > 10:
+                        fragment = f"{file_name[:4]}..{file_name[-4:]}"  # Сокращённое название
+                    else:
+                        fragment = file_name  # Если имя короткое, используем его целиком
 
                     # Используем partial для передачи правильного индекса в on_release
                     button = Button(text=str(i), size_hint_y=None, height=20)
                     button.bind(on_release=partial(self.display_text, i - 1))  # Передаем индекс
 
                     self.table_layout.add_widget(button)
-                    self.table_layout.add_widget(Label(text=file_path.split("/")[-1], size_hint_y=None, height=20))
+                    self.table_layout.add_widget(Label(text=fragment, size_hint_y=None, height=20))
                     self.table_layout.add_widget(Label(text=str(words_count), size_hint_y=None, height=20))
 
             except Exception as e:
@@ -161,7 +168,8 @@ class MyApp(MDApp):
         Отображает текст выбранного файла.
         """
         file_path, text = self.texts[index]
-        self.text_area.text = f"Файл: {file_path}\n\n{text}"
+        # Отображение текста в правом окне
+        self.text_area.text = f"{text}"
     #############################################################################
 
 
