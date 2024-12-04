@@ -53,6 +53,12 @@ class IconButtonWithTooltip(MDIconButton, MDTooltip):
 
 
 class MyApp(MDApp):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.fragments = {}  # Словарь для хранения фрагментов
+        self.table_layout = None  # Контейнер для отображения таблицы
+        self.original_text = ""  # Переменная для хранения исходного текста
+
     def build(self):
         self.texts = []
         self.text_area = TextInput(
@@ -267,8 +273,8 @@ class MyApp(MDApp):
 
     def split_text(self, instance):
         """
-        Разделяет текст в text_area на две части, используя позицию курсора.
-        Обновляет таблицу с новыми фрагментами, не добавляя старые данные.
+        Разделяет текст в text_area на части, используя позицию курсора.
+        Обновляет таблицу с новыми фрагментами.
         """
         cursor_position = self.text_area.cursor_index()  # Получаем текущую позицию курсора
         text = self.text_area.text
@@ -277,52 +283,45 @@ class MyApp(MDApp):
         first_part = text[:cursor_position].strip()
         second_part = text[cursor_position:].strip()
 
-        # Обновляем таблицу только новыми фрагментами
-        self.update_table(first_part, second_part)
+        # Сохраняем разделенные части в словарь
+        self.fragments["fl.1"] = first_part
+        self.fragments["fl.2"] = second_part
 
-    def update_table(self, first_part, second_part):
+        # Обновляем текст в text_area (удаляем разделённую часть)
+        self.text_area.text = first_part
+
+        # Обновляем таблицу
+        self.update_table()
+
+    def update_table(self):
         """
         Обновляет таблицу с новыми фрагментами после разделения текста.
-        Удаляет старые строки и добавляет только новые фрагменты.
+        Не очищает существующие данные в таблице.
         """
         # Считаем количество слов в каждом фрагменте
-        first_part_word_count = len(first_part.split())
-        second_part_word_count = len(second_part.split())
+        current_rows = [child for child in self.table_layout.children]
 
-        # Генерация короткого имени для отображения
-        fragment1 = "fl 1"
-        fragment2 = "fl 2"
+        # Добавляем новый фрагмент
+        for idx, (key, fragment_text) in enumerate(self.fragments.items(), 1):
+            word_count = len(fragment_text.split())
 
-        # Очищаем таблицу перед добавлением новых данных
-        self.table_layout.clear_widgets()
+            # Номер фрагмента теперь выполняет функцию кнопки "Просмотреть"
+            button = Button(text=str(len(current_rows) + 1), size_hint_y=None, height=20)
+            # Привязываем действие на нажатие
+            button.bind(on_press=lambda instance, text=fragment_text: self.view_fragment(text))
 
-        # Добавляем заголовки
-        headers = ["##", "Фрагмент", "Слов", "Выбрать"]
-        for header in headers:
-            self.table_layout.add_widget(Label(text=header, size_hint_y=None, height=20, font_size="12sp"))
+            # Добавляем в таблицу
+            self.table_layout.add_widget(button)
+            self.table_layout.add_widget(Label(text=key, size_hint_y=None, height=20))
+            self.table_layout.add_widget(Label(text=str(word_count), size_hint_y=None, height=20))
+            self.table_layout.add_widget(CheckBox(size_hint_y=None, height=20))
 
-        # Добавляем первый фрагмент
-        button1 = Button(text="1", size_hint_y=None, height=20)
-        button1.bind(on_press=lambda instance: self.view_fragment(first_part))  # Привязка к обработчику
-        self.table_layout.add_widget(button1)
-        self.table_layout.add_widget(Label(text=fragment1, size_hint_y=None, height=20))
-        self.table_layout.add_widget(Label(text=str(first_part_word_count), size_hint_y=None, height=20))
-        self.table_layout.add_widget(CheckBox(size_hint_y=None, height=20))
-
-        # Добавляем второй фрагмент
-        button2 = Button(text="2", size_hint_y=None, height=20)
-        button2.bind(on_press=lambda instance: self.view_fragment(second_part))  # Привязка к обработчику
-        self.table_layout.add_widget(button2)
-        self.table_layout.add_widget(Label(text=fragment2, size_hint_y=None, height=20))
-        self.table_layout.add_widget(Label(text=str(second_part_word_count), size_hint_y=None, height=20))
-        self.table_layout.add_widget(CheckBox(size_hint_y=None, height=20))
-
-    def view_fragment(self, fragment_text):
+    def view_fragment(self, fragment_text, instance=None):
         """
         Обработчик для отображения содержимого фрагмента текста.
-        Этот метод может отображать фрагмент в отдельном поле или всплывающем окне.
+        Этот метод будет отображать фрагмент в text_area.
         """
-        # Пример, как можно отобразить содержимое в text_area:
+        # Отображаем фрагмент в text_area
         self.text_area.text = fragment_text
 
 
