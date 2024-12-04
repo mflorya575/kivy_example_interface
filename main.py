@@ -108,6 +108,7 @@ class MyApp(MDApp):
             icon_size="10dp",
             tooltip_text="Разделить текст",
         )
+        button5.bind(on_release=self.split_text)
 
         buttons_layout.add_widget(button1)
         buttons_layout.add_widget(button2)
@@ -245,7 +246,7 @@ class MyApp(MDApp):
 
 
 
-    ############################ Загрузка файлов ################################
+    ############################ Выделение чекбоксов ################################
     def select_all_checkboxes(self, instance):
         """
         Отмечает все чекбоксы в таблице.
@@ -263,6 +264,55 @@ class MyApp(MDApp):
                 child.active = False  # Устанавливаем НЕактивное состояние для чекбоксов
 
     #############################################################################
+
+
+
+
+    def split_text(self, instance):
+        """
+        Разделяет текст в text_area на части, используя позицию курсора.
+        Обновляет таблицу с новыми фрагментами.
+        """
+        cursor_position = self.text_area.cursor_index()  # Получаем текущую позицию курсора
+        text = self.text_area.text
+
+        # Разделяем текст на две части по позиции курсора
+        first_part = text[:cursor_position].strip()
+        second_part = text[cursor_position:].strip()
+
+        # Обновляем текст в text_area
+        self.text_area.text = first_part + "\n---\n" + second_part
+
+        # Обновляем таблицу
+        self.update_table(first_part, second_part)
+
+    def update_table(self, first_part, second_part):
+        """
+        Обновляет таблицу с новыми фрагментами после разделения текста.
+        Не очищает существующие данные в таблице.
+        """
+        # Считаем количество слов в каждом фрагменте
+        first_part_word_count = len(first_part.split())
+        second_part_word_count = len(second_part.split())
+
+        # Генерация короткого имени файла для отображения
+        fragment1 = "fl 1"
+        fragment2 = "fl 2"
+
+        # Считываем текущие данные в таблице
+        current_rows = [child for child in self.table_layout.children]
+
+        # Добавляем новый фрагмент
+        self.table_layout.add_widget(Button(text=str(len(current_rows) + 1), size_hint_y=None, height=20))
+        self.table_layout.add_widget(Label(text=fragment1, size_hint_y=None, height=20))
+        self.table_layout.add_widget(Label(text=str(first_part_word_count), size_hint_y=None, height=20))
+        self.table_layout.add_widget(CheckBox(size_hint_y=None, height=20))
+
+        # Добавляем второй фрагмент
+        self.table_layout.add_widget(Button(text=str(len(current_rows) + 2), size_hint_y=None, height=20))
+        self.table_layout.add_widget(Label(text=fragment2, size_hint_y=None, height=20))
+        self.table_layout.add_widget(Label(text=str(second_part_word_count), size_hint_y=None, height=20))
+        self.table_layout.add_widget(CheckBox(size_hint_y=None, height=20))
 
 
 
