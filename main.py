@@ -78,6 +78,7 @@ class MyApp(MDApp):
             icon_size="10dp",
             tooltip_text="Добавить текстов",
         )
+        button1.bind(on_release=self.open_file_dialog)
         button2 = IconButtonWithTooltip(
             icon="content-save",
             icon_color=(0.5, 0.5, 1, 1),
@@ -85,7 +86,6 @@ class MyApp(MDApp):
             icon_size="10dp",
             tooltip_text="Сохранить изменения",
         )
-        button1.bind(on_release=self.open_file_dialog)
         button3 = IconButtonWithTooltip(
             icon="checkbox-marked-circle-outline",
             icon_color=(0.5, 0.5, 1, 1),
@@ -93,6 +93,7 @@ class MyApp(MDApp):
             icon_size="10dp",
             tooltip_text="Отметить всё",
         )
+        button3.bind(on_release=self.select_all_checkboxes)
         button4 = IconButtonWithTooltip(
             icon="checkbox-marked-circle-minus-outline",
             icon_color=(0.5, 0.5, 1, 1),
@@ -230,6 +231,21 @@ class MyApp(MDApp):
         file_path, text = self.texts[index]
         # Отображение текста в правом окне
         self.text_area.text = f"{text}"
+    #############################################################################
+
+
+
+
+
+    ############################ Загрузка файлов ################################
+    def select_all_checkboxes(self, instance):
+        """
+        Отмечает все чекбоксы в таблице.
+        """
+        for child in self.table_layout.children:
+            if isinstance(child, CheckBox):
+                child.active = True  # Устанавливаем активное состояние для чекбоксов
+
     #############################################################################
 
 
