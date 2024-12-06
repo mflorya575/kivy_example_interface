@@ -110,7 +110,7 @@ class MyApp(MDApp):
         )
         button4.bind(on_release=self.disable_all_checkboxes)
         button5 = IconButtonWithTooltip(
-            icon="code-brackets",
+            icon="window-close",
             icon_color=(0.5, 0.5, 1, 1),
             md_bg_color="#e33d3d",
             icon_size="10dp",
