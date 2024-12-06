@@ -114,15 +114,23 @@ class MyApp(MDApp):
             icon_color=(0.5, 0.5, 1, 1),
             md_bg_color="#e33d3d",
             icon_size="10dp",
+            tooltip_text="Удалить фрагмент",
+        )
+        button6 = IconButtonWithTooltip(
+            icon="code-brackets",
+            icon_color=(0.5, 0.5, 1, 1),
+            md_bg_color="#e33d3d",
+            icon_size="10dp",
             tooltip_text="Разделить текст",
         )
-        button5.bind(on_release=self.split_text)
+        button6.bind(on_release=self.split_text)
 
         buttons_layout.add_widget(button1)
         buttons_layout.add_widget(button2)
         buttons_layout.add_widget(button3)
         buttons_layout.add_widget(button4)
         buttons_layout.add_widget(button5)
+        buttons_layout.add_widget(button6)
 
         # Добавляем кнопки в layout
         layout.add_widget(buttons_layout)
