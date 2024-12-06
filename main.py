@@ -56,8 +56,10 @@ class MyApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.fragments = {}  # Словарь для хранения фрагментов
+        self.files = {}
         self.table_layout = None  # Контейнер для отображения таблицы
         self.original_text = ""  # Переменная для хранения исходного текста
+        self.current_fragment_to_remove = None
 
     def build(self):
         self.texts = []
@@ -271,52 +273,138 @@ class MyApp(MDApp):
 
     #############################################################################
 
-    def split_text(self, instance):
-        """
-        Разделяет текст в text_area на части, используя позицию курсора.
-        Обновляет таблицу с новыми фрагментами.
-        """
-        cursor_position = self.text_area.cursor_index()  # Получаем текущую позицию курсора
-        text = self.text_area.text
 
-        # Разделяем текст на две части по позиции курсора
+
+    ############################ Выделение чекбоксов ################################
+    def split_text(self, instance):
+        print("split_text called")
+        cursor_position = self.text_area.cursor_index()  # Получаем текущую позицию курсора
+        text = self.text_area.text.strip()
+
+        if not text:
+            print("Text is empty, aborting split")
+            return
+
+        # Проверяем, является ли это фрагментом или загруженным файлом
+        original_key = None
+        is_file = False
+        for key, fragment_text in self.fragments.items():
+            if fragment_text == text:
+                original_key = key
+                break
+
+        if original_key is None:
+            # Проверяем среди файлов
+            for file_name, file_text in self.files.items():  # `self.files` — это словарь с загруженными файлами
+                if file_text == text:
+                    original_key = file_name  # Устанавливаем как имя файла
+                    is_file = True
+                    break
+
+        if original_key is None:
+            # Генерируем новый ключ и добавляем текст
+            original_key = f"frag.{len(self.fragments) + 1}"
+            self.fragments[original_key] = text
+            print(f"Added original text to fragments with key: {original_key}")
+
+        # Разделение текста
         first_part = text[:cursor_position].strip()
         second_part = text[cursor_position:].strip()
 
-        # Сохраняем разделенные части в словарь
-        self.fragments["fl.1"] = first_part
-        self.fragments["fl.2"] = second_part
+        print("First part:", first_part)
+        print("Second part:", second_part)
 
-        # Обновляем текст в text_area (удаляем разделённую часть)
+        if not first_part or not second_part:
+            print("One of the parts is empty, aborting split")
+            return
+
+        # Обновление для фрагмента
+        if not is_file:
+            # Удаляем исходный фрагмент из словаря
+            del self.fragments[original_key]
+
+            # Обновляем оригинальный ключ с первой частью
+            self.fragments[original_key] = first_part
+
+            # Создаем ключ для новой части
+            new_key = f"{original_key}.1"
+
+            # Добавляем новую часть
+            new_fragments = {
+                new_key: second_part,
+            }
+            self.fragments.update(new_fragments)
+        else:
+            # Для файлов: обновляем содержимое файла
+            self.files[original_key] = first_part
+            new_key = f"{original_key}.1"
+            self.files[new_key] = second_part
+
+        # Обновляем текст в text_area (оставляем первую часть)
         self.text_area.text = first_part
 
-        # Обновляем таблицу
-        self.update_table()
+        print("Updated fragments/files:", self.fragments, self.files)
 
-    def update_table(self):
+        # Обновляем таблицу: удаляем оригинальный элемент и добавляем обе части
+        if is_file:
+            self.update_table(removed_key=original_key, new_fragments={original_key: first_part, new_key: second_part})
+        else:
+            self.update_table(removed_key=original_key, new_fragments={original_key: first_part, new_key: second_part})
+
+    def update_table(self, removed_key=None, new_fragments=None):
         """
-        Обновляет таблицу с новыми фрагментами после разделения текста.
-        Не очищает существующие данные в таблице.
+        Обновляет таблицу: удаляет строку с `removed_key` и добавляет строки из `new_fragments`.
         """
-        # Считаем количество слов в каждом фрагменте
-        current_rows = [child for child in self.table_layout.children]
+        print("Updating table...")
+        print(f"Removed key: {removed_key}")
+        print(f"New fragments: {new_fragments}")
 
-        # Добавляем новый фрагмент
-        for idx, (key, fragment_text) in enumerate(self.fragments.items(), 1):
-            word_count = len(fragment_text.split())
+        if removed_key:
+            # Удаляем строку, связанную с removed_key
+            widgets_to_remove = []
+            for i, child in enumerate(self.table_layout.children[:]):
+                widget_text = getattr(child, 'text', '').strip()
+                if widget_text == removed_key.strip():
+                    # Удаляем строку (4 виджета: кнопка, ключ, счетчик слов, чекбокс)
+                    widgets_to_remove.extend(self.table_layout.children[i:i + 4])
+                    break
 
-            # Номер фрагмента теперь выполняет функцию кнопки "Просмотреть"
-            button = Button(text=str(len(current_rows) + 1), size_hint_y=None, height=20)
-            # Привязываем действие на нажатие
-            button.bind(on_press=lambda instance, text=fragment_text: self.view_fragment(text))
+            if widgets_to_remove:
+                for widget in widgets_to_remove:
+                    print(f"Removing widget: {widget} | Text: {getattr(widget, 'text', 'No text')}")
+                    self.table_layout.remove_widget(widget)
+            else:
+                print(f"Key {removed_key} not found in table_layout!")
 
-            # Добавляем в таблицу
-            self.table_layout.add_widget(button)
-            self.table_layout.add_widget(Label(text=key, size_hint_y=None, height=20))
-            self.table_layout.add_widget(Label(text=str(word_count), size_hint_y=None, height=20))
-            self.table_layout.add_widget(CheckBox(size_hint_y=None, height=20))
+        if new_fragments:
+            # Добавляем новые строки для фрагментов или файлов
+            for key, fragment_text in new_fragments.items():
+                word_count = len(fragment_text.split())
 
-    def view_fragment(self, fragment_text, instance=None):
+                # Проверяем, это фрагмент или файл
+                if key.startswith("frag"):
+                    # Это фрагмент текста
+                    button = Button(text=str(len(self.fragments)), size_hint_y=None, height=20)
+                    button.bind(
+                        on_press=lambda instance, text=fragment_text, key=key: self.view_fragment(text, instance, key)
+                    )
+                else:
+                    # Это файл
+                    button = Button(text=key, size_hint_y=None, height=20)
+                    button.bind(
+                        on_press=lambda instance, text=fragment_text, key=key: self.view_fragment(text, instance, key)
+                    )
+
+                # Добавляем новые виджеты в таблицу
+                self.table_layout.add_widget(button)
+                self.table_layout.add_widget(Label(text=key, size_hint_y=None, height=20))
+                self.table_layout.add_widget(Label(text=str(word_count), size_hint_y=None, height=20))
+                self.table_layout.add_widget(CheckBox(size_hint_y=None, height=20))
+
+                print(f"Added fragment/file: {key} with word count {word_count}")
+
+
+    def view_fragment(self, fragment_text, instance=None, fragment_key=None):
         """
         Обработчик для отображения содержимого фрагмента текста.
         Этот метод будет отображать фрагмент в text_area.
@@ -324,6 +412,13 @@ class MyApp(MDApp):
         # Отображаем фрагмент в text_area
         self.text_area.text = fragment_text
 
+        # Если это тот фрагмент, который мы разделили, удаляем его
+        if fragment_key == self.current_fragment_to_remove:
+            del self.fragments[fragment_key]
+
+        # Обновляем таблицу, чтобы отобразить изменения
+        self.update_table()
+    #############################################################################
 
 
 
