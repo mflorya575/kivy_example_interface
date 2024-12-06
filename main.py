@@ -116,6 +116,7 @@ class MyApp(MDApp):
             icon_size="10dp",
             tooltip_text="Удалить фрагмент",
         )
+        button5.bind(on_release=self.delete_selected_fragments)
         button6 = IconButtonWithTooltip(
             icon="code-brackets",
             icon_color=(0.5, 0.5, 1, 1),
@@ -428,7 +429,49 @@ class MyApp(MDApp):
         self.update_table()
     #############################################################################
 
+    def delete_selected_fragments(self, instance):
+        """Удаляет выбранные фрагменты, если активирован чекбокс."""
+        fragments_to_delete = []
 
+        # Перебираем виджеты в таблице, чтобы найти все активированные чекбоксы
+        for i, widget in enumerate(self.table_layout.children[:]):
+            if isinstance(widget, CheckBox) and widget.active:  # Проверяем, выбран ли чекбокс
+                # Определяем индекс фрагмента, связанного с чекбоксом
+                fragment_index = i // 4
+                fragments_to_delete.append(fragment_index)
+                print(f"Fragment with index {fragment_index} marked for deletion.")
+
+        # Удаляем выбранные фрагменты из словаря
+        removed_keys = []
+        for fragment_index in fragments_to_delete:
+            if fragment_index in self.fragments:
+                removed_key = list(self.fragments.keys())[fragment_index]  # Получаем ключ фрагмента
+                removed_keys.append(removed_key)
+                del self.fragments[removed_key]
+                print(f"Fragment with key {removed_key} deleted.")
+
+        # Обновляем таблицу после удаления фрагментов
+        self.update_table_after_deletion(fragments_to_delete)  # Передаем список всех фрагментов для удаления
+        self.update_table()
+
+    def update_table_after_deletion(self, fragments_to_delete):
+        """Обновляет таблицу после удаления фрагментов."""
+        widgets_to_remove = []
+
+        # Перебираем все виджеты в таблице
+        for i, widget in enumerate(self.table_layout.children[:]):
+            # Проверяем, принадлежит ли виджет фрагментам, которые мы собираемся удалить
+            if i // 4 in fragments_to_delete:  # Проверяем, связан ли виджет с фрагментом для удаления
+                widgets_to_remove.append(widget)
+
+        # Удаляем все виджеты, связанные с этими фрагментами
+        for widget in widgets_to_remove:
+            self.table_layout.remove_widget(widget)
+
+    def get_fragment_index_from_checkbox(self, checkbox):
+        """Получает индекс фрагмента, связанного с чекбоксом."""
+        # Логика для получения индекса фрагмента, связанного с чекбоксом
+        return self.table_layout.children.index(checkbox) // 4
 
 
 if __name__ == "__main__":
