@@ -12,7 +12,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.core.window import Window
-from kivymd.uix.button import MDIconButton
+from kivymd.uix.button import MDIconButton, MDRectangleFlatButton
+from kivymd.uix.dialog import MDDialog
 from kivymd.uix.tooltip import MDTooltip
 
 from functools import partial
@@ -64,7 +65,7 @@ class MyApp(MDApp):
     def build(self):
         self.texts = []
         self.text_area = TextInput(
-            text="Нет текста", multiline=True, size_hint=(0.8, 1), readonly=False
+            text="Нет текста", multiline=True, size_hint=(0.8, 1), readonly=True
         )
 
         # Основная панель с вкладками
@@ -116,6 +117,7 @@ class MyApp(MDApp):
             icon_size="10dp",
             tooltip_text="Обработка",
         )
+        button5.bind(on_release=self.show_processing_dialog)
         button6 = IconButtonWithTooltip(
             icon="window-close",
             icon_color=(0.5, 0.5, 1, 1),
@@ -173,6 +175,37 @@ class MyApp(MDApp):
         tb.add_widget(dictionary_tab)
 
         return tb
+
+
+
+
+    def show_processing_dialog(self, *args):
+        # Создаем диалоговое окно
+        self.dialog = MDDialog(
+            title="Выберите действие:",
+            type="simple",
+            buttons=[
+                MDRectangleFlatButton(
+                    text="Разбить на фрагменты",
+                    on_release=self.action_one
+                ),
+                MDRectangleFlatButton(
+                    text="Применить фильтры",
+                    on_release=self.action_two
+                ),
+            ],
+        )
+        self.dialog.open()
+
+    def action_one(self, *args):
+        print("Вы выбрали - Разбить на фрагменты")
+        self.dialog.dismiss()
+
+    def action_two(self, *args):
+        print("Вы выбрали - Применить фильтры")
+        self.dialog.dismiss()
+
+
 
 
 
