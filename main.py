@@ -66,6 +66,7 @@ class MyApp(MDApp):
         self.original_text = ""  # Переменная для хранения исходного текста
         self.current_fragment_to_remove = None
 
+    # dialog = None
     def build(self):
         self.texts = []
         self.text_area = TextInput(
@@ -206,9 +207,8 @@ class MyApp(MDApp):
         if self.dialog:
             self.dialog.dismiss()
 
-        # Контейнер для настроек
-        layout = GridLayout(cols=2, padding=10, spacing=10, size_hint_y=None)
-        layout.bind(minimum_height=layout.setter("height"))
+        # Контейнер для настроек (используем BoxLayout вместо GridLayout)
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         # Разбить по строке
         checkbox_row = MDCheckbox()
@@ -228,7 +228,7 @@ class MyApp(MDApp):
         layout.add_widget(label_target)
         layout.add_widget(target_input)
 
-        label_tolerance = MDLabel(text="Допуск:")
+        label_tolerance = MDLabel(text="+-:")
         tolerance_input = TextInput(hint_text="20", size_hint=(None, None), width=100, height=30)
         layout.add_widget(label_tolerance)
         layout.add_widget(tolerance_input)
@@ -239,15 +239,17 @@ class MyApp(MDApp):
             MDRectangleFlatButton(text="Отменить", on_release=self.cancel_dialog),
         ]
 
-        # Создаем диалог с GridLayout и максимальными размерами
+        # Создаем диалог с BoxLayout и кнопками
         self.dialog = MDDialog(
             title="Настройка фрагментатора",
             type="custom",
-            content_cls=MDBoxLayout(orientation="vertical", children=[layout]),  # Передаем GridLayout сюда
+            content_cls=layout,  # Прямо передаем BoxLayout сюда
             buttons=buttons,
             size_hint=(0.6, None),  # Это задает размер диалога по ширине
             height=700,  # Устанавливаем фиксированную высоту для диалога
         )
+
+        # Открываем диалог
         self.dialog.open()
 
     def apply_filters(self, *args):
