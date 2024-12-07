@@ -188,9 +188,35 @@ class MyApp(MDApp):
 
 
 
+
+
+
+
+
+
+    ############################ Обработка ################################
     def show_processing_dialog(self, *args):
         # Создаем диалоговое окно выбора действия
         if not self.dialog:
+            self.dialog = MDDialog(
+                title="Выберите действие:",
+                type="simple",
+                buttons=[
+                    MDRectangleFlatButton(
+                        text="Разбить на фрагменты",
+                        on_release=self.show_fragmentation_settings,  # Обработчик для кнопки
+                    ),
+                    MDRectangleFlatButton(
+                        text="Применить фильтры",
+                        on_release=self.apply_filters,
+                    ),
+                ],
+            )
+        self.dialog.open()
+
+    def show_processing_dialog(self, *args):
+        # Создаем диалоговое окно выбора действия
+        if not self.dialog:  # Проверяем, что диалог не открыт
             self.dialog = MDDialog(
                 title="Выберите действие:",
                 type="simple",
@@ -211,9 +237,10 @@ class MyApp(MDApp):
         # Логируем для проверки, что метод вызывается
         print("Кнопка 'Разбить на фрагменты' нажата")
 
-        # Закрываем предыдущий диалог, если он есть
+        # Закрываем текущий диалог с выбором действия, если он открыт
         if self.dialog:
             self.dialog.dismiss()
+            self.dialog = None  # Обнуляем ссылку на старый диалог
 
         # Создаем контейнер для всех элементов интерфейса
         content = BoxLayout(
@@ -311,18 +338,23 @@ class MyApp(MDApp):
         print("Применение фильтров")
         if self.dialog:
             self.dialog.dismiss()
+            self.dialog = None  # Обнуляем ссылку на диалог
 
     def confirm_fragmentation(self, *args):
         # Подтверждение фрагментации
         print("Фрагментация настроена")
         if self.dialog:
             self.dialog.dismiss()
+            self.dialog = None  # Обнуляем ссылку на диалог
 
     def cancel_dialog(self, *args):
         # Отмена диалога
         print("Диалог отменен")
         if self.dialog:
             self.dialog.dismiss()
+            self.dialog = None  # Обнуляем ссылку на диалог
+
+    #############################################################################
 
 
 
