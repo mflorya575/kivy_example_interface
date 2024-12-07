@@ -1,3 +1,5 @@
+from docutils.nodes import title
+from kivy.lang import Builder
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
@@ -65,8 +67,8 @@ class MyApp(MDApp):
         self.table_layout = None  # Контейнер для отображения таблицы
         self.original_text = ""  # Переменная для хранения исходного текста
         self.current_fragment_to_remove = None
+        self.dialog = None
 
-    # dialog = None
     def build(self):
         self.texts = []
         self.text_area = TextInput(
@@ -184,87 +186,142 @@ class MyApp(MDApp):
 
 
 
+
+
     def show_processing_dialog(self, *args):
-        # Создаем диалоговое окно
-        self.dialog = MDDialog(
-            title="Выберите действие:",
-            type="simple",
-            buttons=[
-                MDRectangleFlatButton(
-                    text="Разбить на фрагменты",
-                    on_release=self.show_fragmentation_settings,
-                ),
-                MDRectangleFlatButton(
-                    text="Применить фильтры",
-                    on_release=self.apply_filters,
-                ),
-            ],
-        )
+        # Создаем диалоговое окно выбора действия
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title="Выберите действие:",
+                type="simple",
+                buttons=[
+                    MDRectangleFlatButton(
+                        text="Разбить на фрагменты",
+                        on_release=self.show_fragmentation_settings,  # Обработчик для кнопки
+                    ),
+                    MDRectangleFlatButton(
+                        text="Применить фильтры",
+                        on_release=self.apply_filters,
+                    ),
+                ],
+            )
         self.dialog.open()
 
     def show_fragmentation_settings(self, *args):
-        # Закрываем предыдущий диалог
+        # Логируем для проверки, что метод вызывается
+        print("Кнопка 'Разбить на фрагменты' нажата")
+
+        # Закрываем предыдущий диалог, если он есть
         if self.dialog:
             self.dialog.dismiss()
 
-        # Контейнер для настроек (используем BoxLayout вместо GridLayout)
-        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        # Создаем контейнер для всех элементов интерфейса
+        content = BoxLayout(
+            orientation="vertical",
+            spacing="12dp",
+            size_hint_y=None,
+            height="300dp"
+        )
 
-        # Разбить по строке
+        # Создание элементов интерфейса
+        label1 = MDLabel(
+            text="Разбить по строке",
+            size_hint_y=None,
+            height="30dp",
+            theme_text_color="Primary"
+        )
         checkbox_row = MDCheckbox()
-        label_row = MDLabel(text="Разбить по строке")
-        layout.add_widget(label_row)
-        layout.add_widget(checkbox_row)
+        checkbox_row.id = "checkbox_row"  # Устанавливаем id после создания виджета
 
-        # Разбить по размеру
+        label2 = MDLabel(
+            text="Разбить по размеру",
+            size_hint_y=None,
+            height="30dp",
+            theme_text_color="Primary"
+        )
         checkbox_size = MDCheckbox()
-        label_size = MDLabel(text="Разбить по размеру")
-        layout.add_widget(label_size)
-        layout.add_widget(checkbox_size)
+        checkbox_size.id = "checkbox_size"  # Устанавливаем id после создания виджета
 
-        # Поле для настроек размеров
-        label_target = MDLabel(text="Цель:")
-        target_input = TextInput(hint_text="50", size_hint=(None, None), width=100, height=30)
-        layout.add_widget(label_target)
-        layout.add_widget(target_input)
+        label3 = MDLabel(
+            text="Цель:",
+            size_hint_y=None,
+            height="30dp",
+            theme_text_color="Primary"
+        )
+        target_input = TextInput(
+            hint_text="50",
+            size_hint=(None, None),
+            width=100,
+            height=30
+        )
+        target_input.id = "target_input"  # Устанавливаем id после создания виджета
 
-        label_tolerance = MDLabel(text="+-:")
-        tolerance_input = TextInput(hint_text="20", size_hint=(None, None), width=100, height=30)
-        layout.add_widget(label_tolerance)
-        layout.add_widget(tolerance_input)
+        label4 = MDLabel(
+            text="+-:",
+            size_hint_y=None,
+            height="30dp",
+            theme_text_color="Primary"
+        )
+        tolerance_input = TextInput(
+            hint_text="20",
+            size_hint=(None, None),
+            width=100,
+            height=30
+        )
+        tolerance_input.id = "tolerance_input"  # Устанавливаем id после создания виджета
 
-        # Кнопки OK и Отмена
-        buttons = [
-            MDRectangleFlatButton(text="OK", on_release=self.confirm_fragmentation),
-            MDRectangleFlatButton(text="Отменить", on_release=self.cancel_dialog),
-        ]
+        # Добавление элементов в контейнер content
+        content.add_widget(label1)
+        content.add_widget(checkbox_row)
+        content.add_widget(label2)
+        content.add_widget(checkbox_size)
+        content.add_widget(label3)
+        content.add_widget(target_input)
+        content.add_widget(label4)
+        content.add_widget(tolerance_input)
 
-        # Создаем диалог с BoxLayout и кнопками
+        # Кнопки внизу
+        button_box = BoxLayout(
+            size_hint_y=None,
+            height="50dp",
+            spacing=10
+        )
+        ok_button = MDRectangleFlatButton(
+            text="OK", on_release=self.confirm_fragmentation
+        )
+        cancel_button = MDRectangleFlatButton(
+            text="Отменить", on_release=self.cancel_dialog
+        )
+        button_box.add_widget(ok_button)
+        button_box.add_widget(cancel_button)
+
+        # Добавляем BoxLayout с кнопками в основной контейнер
+        content.add_widget(button_box)
+
+        # Создаем новый диалог с этим контентом
         self.dialog = MDDialog(
             title="Настройка фрагментатора",
             type="custom",
-            content_cls=layout,  # Прямо передаем BoxLayout сюда
-            buttons=buttons,
-            size_hint=(0.6, None),  # Это задает размер диалога по ширине
-            height=700,  # Устанавливаем фиксированную высоту для диалога
+            content_cls=content,  # Передаем контейнер в диалог
         )
-
-        # Открываем диалог
         self.dialog.open()
 
     def apply_filters(self, *args):
+        # Логика применения фильтров
+        print("Применение фильтров")
         if self.dialog:
-            print("Вы выбрали - Применить фильтры")
             self.dialog.dismiss()
 
     def confirm_fragmentation(self, *args):
+        # Подтверждение фрагментации
+        print("Фрагментация настроена")
         if self.dialog:
-            print("Фрагментация настроена")
             self.dialog.dismiss()
 
     def cancel_dialog(self, *args):
+        # Отмена диалога
+        print("Диалог отменен")
         if self.dialog:
-            print("Диалог отменен")
             self.dialog.dismiss()
 
 
