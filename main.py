@@ -1,6 +1,7 @@
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
 
 from kivy.uix.stacklayout import StackLayout
@@ -12,8 +13,11 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.core.window import Window
-from kivymd.uix.button import MDIconButton, MDRectangleFlatButton
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDIconButton, MDRectangleFlatButton, MDFlatButton
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.label import MDLabel
+from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.tooltip import MDTooltip
 
 from functools import partial
@@ -187,23 +191,79 @@ class MyApp(MDApp):
             buttons=[
                 MDRectangleFlatButton(
                     text="Разбить на фрагменты",
-                    on_release=self.action_one
+                    on_release=self.show_fragmentation_settings,
                 ),
                 MDRectangleFlatButton(
                     text="Применить фильтры",
-                    on_release=self.action_two
+                    on_release=self.apply_filters,
                 ),
             ],
         )
         self.dialog.open()
 
-    def action_one(self, *args):
-        print("Вы выбрали - Разбить на фрагменты")
-        self.dialog.dismiss()
+    def show_fragmentation_settings(self, *args):
+        # Закрываем предыдущий диалог
+        if self.dialog:
+            self.dialog.dismiss()
 
-    def action_two(self, *args):
-        print("Вы выбрали - Применить фильтры")
-        self.dialog.dismiss()
+        # Контейнер для настроек
+        layout = GridLayout(cols=2, padding=10, spacing=10, size_hint_y=None)
+        layout.bind(minimum_height=layout.setter("height"))
+
+        # Разбить по строке
+        checkbox_row = MDCheckbox()
+        label_row = MDLabel(text="Разбить по строке")
+        layout.add_widget(label_row)
+        layout.add_widget(checkbox_row)
+
+        # Разбить по размеру
+        checkbox_size = MDCheckbox()
+        label_size = MDLabel(text="Разбить по размеру")
+        layout.add_widget(label_size)
+        layout.add_widget(checkbox_size)
+
+        # Поле для настроек размеров
+        label_target = MDLabel(text="Цель:")
+        target_input = TextInput(hint_text="50", size_hint=(None, None), width=100, height=30)
+        layout.add_widget(label_target)
+        layout.add_widget(target_input)
+
+        label_tolerance = MDLabel(text="Допуск:")
+        tolerance_input = TextInput(hint_text="20", size_hint=(None, None), width=100, height=30)
+        layout.add_widget(label_tolerance)
+        layout.add_widget(tolerance_input)
+
+        # Кнопки OK и Отмена
+        buttons = [
+            MDRectangleFlatButton(text="OK", on_release=self.confirm_fragmentation),
+            MDRectangleFlatButton(text="Отменить", on_release=self.cancel_dialog),
+        ]
+
+        # Создаем диалог с GridLayout и максимальными размерами
+        self.dialog = MDDialog(
+            title="Настройка фрагментатора",
+            type="custom",
+            content_cls=MDBoxLayout(orientation="vertical", children=[layout]),  # Передаем GridLayout сюда
+            buttons=buttons,
+            size_hint=(0.6, None),  # Это задает размер диалога по ширине
+            height=700,  # Устанавливаем фиксированную высоту для диалога
+        )
+        self.dialog.open()
+
+    def apply_filters(self, *args):
+        if self.dialog:
+            print("Вы выбрали - Применить фильтры")
+            self.dialog.dismiss()
+
+    def confirm_fragmentation(self, *args):
+        if self.dialog:
+            print("Фрагментация настроена")
+            self.dialog.dismiss()
+
+    def cancel_dialog(self, *args):
+        if self.dialog:
+            print("Диалог отменен")
+            self.dialog.dismiss()
 
 
 
