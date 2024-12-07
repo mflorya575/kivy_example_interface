@@ -77,7 +77,7 @@ class MyApp(MDApp):
         layout = BoxLayout(orientation="vertical", spacing=10, padding=5)
 
         # Используем StackLayout для кнопок
-        buttons_layout = StackLayout(orientation="lr-tb", size_hint_y=None, height=40)
+        buttons_layout = StackLayout(orientation="lr-tb", size_hint_y=None, spacing=10, height=40)
         button1 = IconButtonWithTooltip(
             icon="folder-multiple-plus",
             icon_color=(0.5, 0.5, 1, 1),
@@ -110,21 +110,28 @@ class MyApp(MDApp):
         )
         button4.bind(on_release=self.disable_all_checkboxes)
         button5 = IconButtonWithTooltip(
+            icon="calculator",
+            icon_color=(0.5, 0.5, 1, 1),
+            md_bg_color="#f2e66b",
+            icon_size="10dp",
+            tooltip_text="Обработка",
+        )
+        button6 = IconButtonWithTooltip(
             icon="window-close",
             icon_color=(0.5, 0.5, 1, 1),
             md_bg_color="#e33d3d",
             icon_size="10dp",
             tooltip_text="Удалить фрагмент",
         )
-        button5.bind(on_release=self.delete_selected_fragments)
-        button6 = IconButtonWithTooltip(
+        button6.bind(on_release=self.delete_selected_fragments)
+        button7 = IconButtonWithTooltip(
             icon="code-brackets",
             icon_color=(0.5, 0.5, 1, 1),
             md_bg_color="#e33d3d",
             icon_size="10dp",
             tooltip_text="Разделить текст",
         )
-        button6.bind(on_release=self.split_text)
+        button7.bind(on_release=self.split_text)
 
         buttons_layout.add_widget(button1)
         buttons_layout.add_widget(button2)
@@ -132,6 +139,7 @@ class MyApp(MDApp):
         buttons_layout.add_widget(button4)
         buttons_layout.add_widget(button5)
         buttons_layout.add_widget(button6)
+        buttons_layout.add_widget(button7)
 
         # Добавляем кнопки в layout
         layout.add_widget(buttons_layout)
