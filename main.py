@@ -16,6 +16,7 @@ from kivymd.uix.button import MDIconButton, MDRectangleFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.label import MDLabel
 from kivymd.uix.selectioncontrol import MDCheckbox
+from kivymd.uix.textfield import MDTextField
 from kivymd.uix.tooltip import MDTooltip
 
 from functools import partial
@@ -238,70 +239,127 @@ class MyApp(MDApp):
             self.dialog.dismiss()
             self.dialog = None  # Обнуляем ссылку на старый диалог
 
+        # Функция для обработки нажатий на чекбоксы
+        def on_checkbox_active(instance, value):
+            if value:
+                print(f"{instance.id} активирован")
+            else:
+                print(f"{instance.id} деактивирован")
+
         # Создаем контейнер для всех элементов интерфейса
         content = BoxLayout(
             orientation="vertical",
-            spacing="12dp",
+            spacing="20dp",
+            padding="20dp",
             size_hint_y=None,
-            height="300dp"
+            height="320dp"
         )
 
-        # Создание элементов интерфейса
+        # Создание группы "Разбить по строке"
+        row_layout = BoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height="30dp",
+            spacing="10dp",
+        )
         label1 = MDLabel(
             text="Разбить по строке",
-            size_hint_y=None,
+            size_hint=(1, None),
             height="30dp",
             theme_text_color="Primary"
         )
-        checkbox_row = MDCheckbox()
-        checkbox_row.id = "checkbox_row"  # Устанавливаем id после создания виджета
+        checkbox_row = MDCheckbox(
+            size_hint=(None, None),
+            size=("48dp", "48dp"),
+            pos_hint={"center_y": 0.5}
+        )
+        checkbox_row.id = "checkbox_row"
+        checkbox_row.bind(active=on_checkbox_active)
 
+        row_layout.add_widget(label1)
+        row_layout.add_widget(checkbox_row)
+
+        # Создание группы "Разбить по размеру"
+        size_layout = BoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height="50dp",
+            spacing="10dp",
+        )
         label2 = MDLabel(
             text="Разбить по размеру",
-            size_hint_y=None,
-            height="30dp",
+            size_hint=(1, None),
+            height="50dp",
             theme_text_color="Primary"
         )
-        checkbox_size = MDCheckbox()
-        checkbox_size.id = "checkbox_size"  # Устанавливаем id после создания виджета
+        checkbox_size = MDCheckbox(
+            size_hint=(None, None),
+            size=("48dp", "48dp"),
+            pos_hint={"center_y": 0.5}
+        )
+        checkbox_size.id = "checkbox_size"
+        checkbox_size.bind(active=on_checkbox_active)
 
+        size_layout.add_widget(label2)
+        size_layout.add_widget(checkbox_size)
+
+        # Поля ввода
+        input_layout = BoxLayout(
+            orientation="vertical",
+            spacing="10dp",
+            size_hint_y=None,
+            padding="10dp",
+        )
+        row_target_layout = BoxLayout(
+            orientation="horizontal",
+            spacing="10dp",
+            size_hint_y=None,
+            height="50dp"
+        )
         label3 = MDLabel(
-            text="Цель:",
-            size_hint_y=None,
-            height="30dp",
-            theme_text_color="Primary"
-        )
-        target_input = TextInput(
-            hint_text="50",
+            text="Цель",
             size_hint=(None, None),
-            width=100,
-            height=30
+            size=("50dp", "50dp"),
+            theme_text_color="Primary",
+            valign="center"
         )
-        target_input.id = "target_input"  # Устанавливаем id после создания виджета
+        target_input = MDTextField(
+            hint_text="Пример: 50",
+            size_hint=(1, None),
+            height="50dp",
+            pos_hint={"center_y": 0.5}
+        )
+        target_input.id = "target_input"
 
+        row_tolerance_layout = BoxLayout(
+            orientation="horizontal",
+            spacing="10dp",
+            size_hint_y=None,
+            height="50dp"
+        )
         label4 = MDLabel(
-            text="+-:",
-            size_hint_y=None,
-            height="30dp",
-            theme_text_color="Primary"
-        )
-        tolerance_input = TextInput(
-            hint_text="20",
+            text="+-",
             size_hint=(None, None),
-            width=100,
-            height=30
+            size=("50dp", "50dp"),
+            theme_text_color="Primary",
+            valign="center"
         )
-        tolerance_input.id = "tolerance_input"  # Устанавливаем id после создания виджета
+        tolerance_input = MDTextField(
+            hint_text="Пример: 20",
+            size_hint=(1, None),
+            height="50dp",
+            pos_hint={"center_y": 0.5}
+        )
+        tolerance_input.id = "tolerance_input"
 
-        # Добавление элементов в контейнер content
-        content.add_widget(label1)
-        content.add_widget(checkbox_row)
-        content.add_widget(label2)
-        content.add_widget(checkbox_size)
-        content.add_widget(label3)
-        content.add_widget(target_input)
-        content.add_widget(label4)
-        content.add_widget(tolerance_input)
+        row_target_layout.add_widget(label3)
+        row_target_layout.add_widget(target_input)
+
+        row_tolerance_layout.add_widget(label4)
+        row_tolerance_layout.add_widget(tolerance_input)
+
+        input_layout.add_widget(row_target_layout)
+        input_layout.add_widget(row_tolerance_layout)
 
         # Кнопки внизу
         button_box = BoxLayout(
@@ -318,14 +376,17 @@ class MyApp(MDApp):
         button_box.add_widget(ok_button)
         button_box.add_widget(cancel_button)
 
-        # Добавляем BoxLayout с кнопками в основной контейнер
+        # Добавление всех элементов в контейнер
+        content.add_widget(row_layout)
+        content.add_widget(size_layout)
+        content.add_widget(input_layout)
         content.add_widget(button_box)
 
         # Создаем новый диалог с этим контентом
         self.dialog = MDDialog(
             title="Настройка фрагментатора",
             type="custom",
-            content_cls=content,  # Передаем контейнер в диалог
+            content_cls=content,
         )
         self.dialog.open()
 
