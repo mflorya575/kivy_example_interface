@@ -231,22 +231,33 @@ class MyApp(MDApp):
         self.dialog.open()
 
     def show_fragmentation_settings(self, *args):
-        # Логируем для проверки, что метод вызывается
         print("Кнопка 'Разбить на фрагменты' нажата")
 
-        # Закрываем текущий диалог с выбором действия, если он открыт
         if self.dialog:
             self.dialog.dismiss()
-            self.dialog = None  # Обнуляем ссылку на старый диалог
+            self.dialog = None
 
-        # Функция для обработки нажатий на чекбоксы
         def on_checkbox_active(instance, value):
-            if value:
-                print(f"{instance.id} активирован")
-            else:
-                print(f"{instance.id} деактивирован")
+            print(f"{instance.id} активирован" if value else f"{instance.id} деактивирован")
 
-        # Создаем контейнер для всех элементов интерфейса
+        # Сохранение ссылок на чекбоксы
+        self.checkbox_size = MDCheckbox(
+            size_hint=(None, None),
+            size=("48dp", "48dp"),
+            pos_hint={"center_y": 0.5},
+        )
+        self.checkbox_size.id = "checkbox_size"
+        self.checkbox_size.bind(active=on_checkbox_active)
+
+        self.checkbox_row = MDCheckbox(
+            size_hint=(None, None),
+            size=("48dp", "48dp"),
+            pos_hint={"center_y": 0.5},
+        )
+        self.checkbox_row.id = "checkbox_row"
+        self.checkbox_row.bind(active=on_checkbox_active)
+
+        # Создаем интерфейс диалога вручную
         content = BoxLayout(
             orientation="vertical",
             spacing="20dp",
@@ -255,134 +266,43 @@ class MyApp(MDApp):
             height="320dp"
         )
 
-        # Создание группы "Разбить по строке"
-        row_layout = BoxLayout(
-            orientation="horizontal",
-            size_hint_y=None,
-            height="30dp",
-            spacing="10dp",
-        )
-        label1 = MDLabel(
-            text="Разбить по строке",
-            size_hint=(1, None),
-            height="30dp",
-            theme_text_color="Primary"
-        )
-        checkbox_row = MDCheckbox(
-            size_hint=(None, None),
-            size=("48dp", "48dp"),
-            pos_hint={"center_y": 0.5}
-        )
-        checkbox_row.id = "checkbox_row"
-        checkbox_row.bind(active=on_checkbox_active)
+        row_layout = BoxLayout(orientation="horizontal", size_hint_y=None, height="30dp", spacing="10dp")
+        row_layout.add_widget(MDLabel(text="Разбить по строке", size_hint=(1, None), height="30dp"))
+        row_layout.add_widget(self.checkbox_row)
 
-        row_layout.add_widget(label1)
-        row_layout.add_widget(checkbox_row)
-
-        # Создание группы "Разбить по размеру"
-        size_layout = BoxLayout(
-            orientation="horizontal",
-            size_hint_y=None,
-            height="50dp",
-            spacing="10dp",
-        )
-        label2 = MDLabel(
-            text="Разбить по размеру",
-            size_hint=(1, None),
-            height="50dp",
-            theme_text_color="Primary"
-        )
-        checkbox_size = MDCheckbox(
-            size_hint=(None, None),
-            size=("48dp", "48dp"),
-            pos_hint={"center_y": 0.5}
-        )
-        checkbox_size.id = "checkbox_size"
-        checkbox_size.bind(active=on_checkbox_active)
-
-        size_layout.add_widget(label2)
-        size_layout.add_widget(checkbox_size)
+        size_layout = BoxLayout(orientation="horizontal", size_hint_y=None, height="50dp", spacing="10dp")
+        size_layout.add_widget(MDLabel(text="Разбить по размеру", size_hint=(1, None), height="50dp"))
+        size_layout.add_widget(self.checkbox_size)
 
         # Поля ввода
-        input_layout = BoxLayout(
-            orientation="vertical",
-            spacing="10dp",
-            size_hint_y=None,
-            padding="10dp",
-        )
-        row_target_layout = BoxLayout(
-            orientation="horizontal",
-            spacing="10dp",
-            size_hint_y=None,
-            height="50dp"
-        )
-        label3 = MDLabel(
-            text="Цель",
-            size_hint=(None, None),
-            size=("50dp", "50dp"),
-            theme_text_color="Primary",
-            valign="center"
-        )
-        target_input = MDTextField(
-            hint_text="Пример: 50",
-            size_hint=(1, None),
-            height="50dp",
-            pos_hint={"center_y": 0.5}
-        )
-        target_input.id = "target_input"
+        input_layout = BoxLayout(orientation="vertical", spacing="10dp", size_hint_y=None, padding="10dp")
+        target_input = MDTextField(hint_text="Пример: 50", size_hint=(1, None), height="50dp")
+        self.target_input = target_input
+        tolerance_input = MDTextField(hint_text="Пример: 20", size_hint=(1, None), height="50dp")
+        self.tolerance_input = tolerance_input
 
-        row_tolerance_layout = BoxLayout(
-            orientation="horizontal",
-            spacing="10dp",
-            size_hint_y=None,
-            height="50dp"
-        )
-        label4 = MDLabel(
-            text="+-",
-            size_hint=(None, None),
-            size=("50dp", "50dp"),
-            theme_text_color="Primary",
-            valign="center"
-        )
-        tolerance_input = MDTextField(
-            hint_text="Пример: 20",
-            size_hint=(1, None),
-            height="50dp",
-            pos_hint={"center_y": 0.5}
-        )
-        tolerance_input.id = "tolerance_input"
-
-        row_target_layout.add_widget(label3)
+        row_target_layout = BoxLayout(orientation="horizontal", spacing="10dp", size_hint_y=None, height="50dp")
+        row_target_layout.add_widget(MDLabel(text="Цель", size_hint=(None, None), size=("50dp", "50dp")))
         row_target_layout.add_widget(target_input)
 
-        row_tolerance_layout.add_widget(label4)
+        row_tolerance_layout = BoxLayout(orientation="horizontal", spacing="10dp", size_hint_y=None, height="50dp")
+        row_tolerance_layout.add_widget(MDLabel(text="+-", size_hint=(None, None), size=("50dp", "50dp")))
         row_tolerance_layout.add_widget(tolerance_input)
 
         input_layout.add_widget(row_target_layout)
         input_layout.add_widget(row_tolerance_layout)
 
-        # Кнопки внизу
-        button_box = BoxLayout(
-            size_hint_y=None,
-            height="50dp",
-            spacing=10
-        )
-        ok_button = MDRectangleFlatButton(
-            text="OK", on_release=self.confirm_fragmentation
-        )
-        cancel_button = MDRectangleFlatButton(
-            text="Отменить", on_release=self.cancel_dialog
-        )
+        button_box = BoxLayout(size_hint_y=None, height="50dp", spacing=10)
+        ok_button = MDRectangleFlatButton(text="OK", on_release=self.confirm_fragmentation)
+        cancel_button = MDRectangleFlatButton(text="Отменить", on_release=self.cancel_dialog)
         button_box.add_widget(ok_button)
         button_box.add_widget(cancel_button)
 
-        # Добавление всех элементов в контейнер
         content.add_widget(row_layout)
         content.add_widget(size_layout)
         content.add_widget(input_layout)
         content.add_widget(button_box)
 
-        # Создаем новый диалог с этим контентом
         self.dialog = MDDialog(
             title="Настройка фрагментатора",
             type="custom",
@@ -398,11 +318,131 @@ class MyApp(MDApp):
             self.dialog = None  # Обнуляем ссылку на диалог
 
     def confirm_fragmentation(self, *args):
-        # Подтверждение фрагментации
         print("Фрагментация настроена")
+
+        # Проверка чекбоксов
+        size_split = self.checkbox_size.active
+        row_split = self.checkbox_row.active
+
+        # Проверка значений в полях ввода
+        target = self.target_input.text
+        tolerance = self.tolerance_input.text
+
+        if not target.isdigit() or not tolerance.isdigit():
+            print("Некорректные значения в полях ввода")
+            return
+
+        target = int(target)
+        tolerance = int(tolerance)
+
+        # Получение текста из таблицы слева
+        selected_texts = self.get_selected_texts()  # Функция для получения выделенных текстов
+        print(f"Выбранные тексты: {selected_texts}")
+
+        if not selected_texts:
+            print("Не выбран текст для разбиения")
+            return
+
+        # Разбиение текста
+        fragmented_texts = []
+        for text in selected_texts:
+            print(f"Обрабатываем текст: {text}")
+            if row_split:
+                fragmented_texts.extend(text.splitlines())  # Разбиваем по строкам
+            elif size_split:
+                fragmented_texts.extend(self.split_by_size(text, target, tolerance))  # Разбиваем по размеру
+
+        print(f"Фрагментированные тексты: {fragmented_texts}")
+        # Обновляем таблицу слева и текстовую область справа
+        self.update_table_and_text_area(fragmented_texts)
+
         if self.dialog:
             self.dialog.dismiss()
-            self.dialog = None  # Обнуляем ссылку на диалог
+            self.dialog = None
+
+    def split_by_size(self, text, target, tolerance):
+        """
+        Разбивает текст на фрагменты с учетом размера (target) и допуска (tolerance).
+        """
+        words = text.split()
+        fragments = []
+        current_fragment = []
+
+        current_size = 0
+        for word in words:
+            print(f"Текущее слово: {word}")
+            if current_size + len(word) + len(current_fragment) <= target + tolerance:
+                current_fragment.append(word)
+                current_size += len(word)
+            else:
+                fragments.append(" ".join(current_fragment))
+                current_fragment = [word]
+                current_size = len(word)
+
+        if current_fragment:
+            fragments.append(" ".join(current_fragment))
+
+        return fragments
+
+    def get_selected_texts(self):
+        selected_texts = []
+        for row in self.table_layout.children:  # Проходим по всем виджетам в GridLayout
+            if isinstance(row, CheckBox) and row.active:
+                # Проверяем родительский виджет чекбокса, чтобы найти соответствующую строку текста
+                parent = row.parent
+                if parent:
+                    for child in parent.children:
+                        if isinstance(child, Label):
+                            text = child.text.strip()  # Добавляем текст метки
+                            print(f"Добавлен текст: {text}")
+                            selected_texts.append(text)
+        return selected_texts
+
+    def update_table_and_text_area(self, fragmented_texts):
+        """
+        Обновляет таблицу и текстовую область с новыми фрагментами.
+        Структурирует таблицу с заголовками "##", "Фрагмент", "Слов", "Выбрать".
+        """
+        # Очищаем таблицу и текстовую область
+        self.table_layout.clear_widgets()  # Очищаем все виджеты в таблице
+        self.text_area.clear_widgets()  # Очищаем текстовую область
+
+        # Добавляем заголовки в таблицу слева
+        self.table_layout.add_widget(Label(text="##", size_hint_y=None, height=40))
+        self.table_layout.add_widget(Label(text="Фрагмент", size_hint_y=None, height=40))
+        self.table_layout.add_widget(Label(text="Слов", size_hint_y=None, height=40))
+        self.table_layout.add_widget(Label(text="Выбрать", size_hint_y=None, height=40))
+
+        # Перебираем фрагментированные тексты
+        for idx, text in enumerate(fragmented_texts, start=1):
+            # Пример подсчета слов в фрагменте
+            word_count = len(text.split())
+
+            # Добавляем кнопку с числовой нумерацией в колонку "##"
+            button = Button(text=str(idx), size_hint_y=None, height=20)
+            button.bind(on_press=lambda btn, idx=idx: self.on_fragment_button_press(idx, fragmented_texts))  # Привязываем обработчик
+            self.table_layout.add_widget(button)
+
+            # Добавляем текст фрагмента в колонку "Фрагмент"
+            self.table_layout.add_widget(Label(text=text, size_hint_y=None, height=20))
+
+            # Добавляем количество слов в колонку "Слов"
+            self.table_layout.add_widget(Label(text=str(word_count), size_hint_y=None, height=20))
+
+            # Добавляем чекбокс в колонку "Выбрать"
+            check_box = CheckBox(size_hint_y=None, height=20)
+            self.table_layout.add_widget(check_box)
+
+            # Также добавляем фрагмент в текстовую область справа
+            self.text_area.add_widget(Label(text=text))
+
+    def on_fragment_button_press(self, idx, fragmented_texts):
+        """
+        Обработчик нажатия на кнопку фрагмента. Обновляет текстовое поле.
+        """
+        # Получаем текст фрагмента по индексу и обновляем текстовую область
+        selected_text = fragmented_texts[idx - 1]  # Индексация начинается с 1
+        self.text_area.text = selected_text  # Устанавливаем текст непосредственно в поле
 
     def cancel_dialog(self, *args):
         # Отмена диалога
@@ -410,7 +450,6 @@ class MyApp(MDApp):
         if self.dialog:
             self.dialog.dismiss()
             self.dialog = None  # Обнуляем ссылку на диалог
-
     #############################################################################
 
 
