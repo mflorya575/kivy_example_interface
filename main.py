@@ -448,7 +448,7 @@ class MyApp(MDApp):
             self.table_layout.add_widget(button)
 
             # Создание и добавление метки с фрагментом
-            self.table_layout.add_widget(Label(text=text, size_hint_y=None, height=20))
+            self.table_layout.add_widget(Label(text='txt', size_hint_y=None, height=20))
 
             # Добавление метки с количеством слов
             self.table_layout.add_widget(Label(text=str(word_count), size_hint_y=None, height=20))
