@@ -20,6 +20,7 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.tooltip import MDTooltip
 
 from functools import partial
+import logging
 
 
 class HoverButton(Button):
@@ -65,6 +66,21 @@ class MyApp(MDApp):
         self.original_text = ""  # Переменная для хранения исходного текста
         self.current_fragment_to_remove = None
         self.dialog = None
+
+        # Настройка логгера
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)  # Уровень логирования (DEBUG для подробных сообщений)
+
+        # Создаем обработчик для записи логов в файл
+        handler = logging.FileHandler('app_log.log', encoding='utf-8')
+        handler.setLevel(logging.DEBUG)  # Уровень логирования для этого обработчика
+
+        # Создаем формат логов
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+
+        # Добавляем обработчик в логгер
+        self.logger.addHandler(handler)
 
     def build(self):
         self.texts = []
@@ -133,7 +149,7 @@ class MyApp(MDApp):
         button7 = IconButtonWithTooltip(
             icon="code-brackets",
             icon_color=(0.5, 0.5, 1, 1),
-            md_bg_color="#e33d3d",
+            md_bg_color="#35C0CD",
             icon_size="10dp",
             tooltip_text="Разделить текст",
         )
@@ -335,8 +351,8 @@ class MyApp(MDApp):
         target = int(target)
         tolerance = int(tolerance)
 
-        # Получение текста из таблицы слева
-        selected_texts = self.get_selected_texts()  # Функция для получения выделенных текстов
+        # Получаем текст из text_area или из загруженных файлов
+        selected_texts = self.get_text_from_area_or_fragments()  # Функция для получения текста
         print(f"Выбранные тексты: {selected_texts}")
 
         if not selected_texts:
@@ -360,31 +376,44 @@ class MyApp(MDApp):
             self.dialog.dismiss()
             self.dialog = None
 
+    def get_text_from_area_or_fragments(self):
+        if self.text_area.text.strip():  # Если в text_area есть текст
+            print(f"Текст в text_area: {self.text_area.text}")  # Проверка текста
+            return [self.text_area.text]  # Возвращаем текст из text_area
+        else:  # Иначе ищем текст в загруженных файлах
+            if self.texts:  # Проверяем, есть ли загруженные тексты
+                selected_texts = [text for _, text in self.texts]  # Извлекаем текст из списка self.texts
+                print(f"Тексты из загруженных файлов: {selected_texts}")
+                return selected_texts  # Возвращаем все тексты из списка
+            return []  # Возвращаем пустой список, если нет текста
+
     def split_by_size(self, text, target, tolerance):
-        """
-        Разбивает текст на фрагменты с учетом размера (target) и допуска (tolerance).
-        """
         words = text.split()
         fragments = []
         current_fragment = []
+        word_count = 0
 
-        current_size = 0
         for word in words:
-            print(f"Текущее слово: {word}")
-            if current_size + len(word) + len(current_fragment) <= target + tolerance:
-                current_fragment.append(word)
-                current_size += len(word)
-            else:
-                fragments.append(" ".join(current_fragment))
-                current_fragment = [word]
-                current_size = len(word)
+            current_fragment.append(word)
+            word_count += 1
 
+            # Когда достигнут предел слов для фрагмента
+            if word_count >= target:
+                fragments.append(" ".join(current_fragment))
+                current_fragment = []
+                word_count = 0
+
+        # Добавляем остатки, если они есть
         if current_fragment:
             fragments.append(" ".join(current_fragment))
 
-        return fragments
+        # Фильтрация фрагментов по допускам
+        return [frag for frag in fragments if len(frag.split()) >= tolerance]
 
     def get_selected_texts(self):
+        """
+        Получаем тексты, которые были выбраны с помощью чекбоксов в таблице.
+        """
         selected_texts = []
         for row in self.table_layout.children:  # Проходим по всем виджетам в GridLayout
             if isinstance(row, CheckBox) and row.active:
@@ -408,10 +437,9 @@ class MyApp(MDApp):
         self.text_area.clear_widgets()  # Очищаем текстовую область
 
         # Добавляем заголовки в таблицу слева
-        self.table_layout.add_widget(Label(text="##", size_hint_y=None, height=40))
-        self.table_layout.add_widget(Label(text="Фрагмент", size_hint_y=None, height=40))
-        self.table_layout.add_widget(Label(text="Слов", size_hint_y=None, height=40))
-        self.table_layout.add_widget(Label(text="Выбрать", size_hint_y=None, height=40))
+        headers = ["##", "Фрагмент", "Слов", "Выбрать"]
+        for header in headers:
+            self.table_layout.add_widget(Label(text=header, size_hint_y=None, height=20, font_size="12sp"))
 
         # Перебираем фрагментированные тексты
         for idx, text in enumerate(fragmented_texts, start=1):
@@ -420,7 +448,8 @@ class MyApp(MDApp):
 
             # Добавляем кнопку с числовой нумерацией в колонку "##"
             button = Button(text=str(idx), size_hint_y=None, height=20)
-            button.bind(on_press=lambda btn, idx=idx: self.on_fragment_button_press(idx, fragmented_texts))  # Привязываем обработчик
+            button.bind(on_press=lambda btn, idx=idx: self.on_fragment_button_press(idx,
+                                                                                    fragmented_texts))  # Привязываем обработчик
             self.table_layout.add_widget(button)
 
             # Добавляем текст фрагмента в колонку "Фрагмент"
@@ -507,12 +536,19 @@ class MyApp(MDApp):
         for header in headers:
             self.table_layout.add_widget(Label(text=header, size_hint_y=None, height=20, font_size="12sp"))
 
+        # Логируем начало загрузки
+        self.logger.info("Начинаем загрузку файлов.")
+
         # Добавляем строки таблицы
         for i, file_path in enumerate(file_paths, start=1):
             try:
                 with open(file_path, 'r', encoding='utf-8') as file:
                     text = file.read().strip()  # Убираем лишние пробелы
                     self.texts.append((file_path, text))  # Добавляем текст в список
+
+                    # Логируем успешную загрузку текста
+                    self.logger.debug(f"Файл загружен: {file_path}, текст длиной {len(text)} символов.")
+
                     words_count = len(text.split())
 
                     # Генерация короткого имени файла для отображения
@@ -536,7 +572,12 @@ class MyApp(MDApp):
                     self.table_layout.add_widget(checkbox)
 
             except Exception as e:
+                # Логируем ошибку при загрузке файла
+                self.logger.error(f"Ошибка при загрузке файла {file_path}: {e}")
                 self.text_area.text = f"Ошибка при загрузке файла {file_path}: {e}"
+
+        # Логируем состояние словаря self.texts после загрузки
+        self.logger.debug(f"Состояние self.texts после загрузки: {self.texts}")
 
     def display_text(self, index, instance=None):
         """
