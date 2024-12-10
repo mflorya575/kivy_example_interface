@@ -377,15 +377,16 @@ class MyApp(MDApp):
             self.dialog = None
 
     def get_text_from_area_or_fragments(self):
-        if self.text_area.text.strip():  # Если в text_area есть текст
-            print(f"Текст в text_area: {self.text_area.text}")  # Проверка текста
-            return [self.text_area.text]  # Возвращаем текст из text_area
-        else:  # Иначе ищем текст в загруженных файлах
-            if self.texts:  # Проверяем, есть ли загруженные тексты
-                selected_texts = [text for _, text in self.texts]  # Извлекаем текст из списка self.texts
+        if self.text_area.text.strip() != 'Нет текста':  # Дополнительная проверка
+            print(f"Текст в text_area: '{self.text_area.text}'")
+            return [self.text_area.text]
+        else:
+            if self.texts:
+                selected_texts = [text for _, text in self.texts]
                 print(f"Тексты из загруженных файлов: {selected_texts}")
-                return selected_texts  # Возвращаем все тексты из списка
-            return []  # Возвращаем пустой список, если нет текста
+                return selected_texts
+            print("Нет текста для разбиения.")
+            return []
 
     def split_by_size(self, text, target, tolerance):
         words = text.split()
@@ -397,34 +398,30 @@ class MyApp(MDApp):
             current_fragment.append(word)
             word_count += 1
 
-            # Когда достигнут предел слов для фрагмента
             if word_count >= target:
                 fragments.append(" ".join(current_fragment))
                 current_fragment = []
                 word_count = 0
 
-        # Добавляем остатки, если они есть
         if current_fragment:
             fragments.append(" ".join(current_fragment))
 
-        # Фильтрация фрагментов по допускам
-        return [frag for frag in fragments if len(frag.split()) >= tolerance]
+        filtered_fragments = [frag for frag in fragments if len(frag.split()) >= tolerance]
+        print(f"Фрагменты после фильтрации: {filtered_fragments}")
+        return filtered_fragments
 
     def get_selected_texts(self):
-        """
-        Получаем тексты, которые были выбраны с помощью чекбоксов в таблице.
-        """
         selected_texts = []
         for row in self.table_layout.children:  # Проходим по всем виджетам в GridLayout
             if isinstance(row, CheckBox) and row.active:
-                # Проверяем родительский виджет чекбокса, чтобы найти соответствующую строку текста
                 parent = row.parent
                 if parent:
                     for child in parent.children:
                         if isinstance(child, Label):
                             text = child.text.strip()  # Добавляем текст метки
-                            print(f"Добавлен текст: {text}")
-                            selected_texts.append(text)
+                            if text:  # Проверяем, что текст не пустой
+                                print(f"Добавлен текст: '{text}'")
+                                selected_texts.append(text)
         return selected_texts
 
     def update_table_and_text_area(self, fragmented_texts):
@@ -443,26 +440,24 @@ class MyApp(MDApp):
 
         # Перебираем фрагментированные тексты
         for idx, text in enumerate(fragmented_texts, start=1):
-            # Пример подсчета слов в фрагменте
             word_count = len(text.split())
 
-            # Добавляем кнопку с числовой нумерацией в колонку "##"
+            # Создание и привязка кнопки с числовой нумерацией
             button = Button(text=str(idx), size_hint_y=None, height=20)
-            button.bind(on_press=lambda btn, idx=idx: self.on_fragment_button_press(idx,
-                                                                                    fragmented_texts))  # Привязываем обработчик
+            button.bind(on_press=lambda btn, idx=idx: self.on_fragment_button_press(idx, fragmented_texts))
             self.table_layout.add_widget(button)
 
-            # Добавляем текст фрагмента в колонку "Фрагмент"
+            # Создание и добавление метки с фрагментом
             self.table_layout.add_widget(Label(text=text, size_hint_y=None, height=20))
 
-            # Добавляем количество слов в колонку "Слов"
+            # Добавление метки с количеством слов
             self.table_layout.add_widget(Label(text=str(word_count), size_hint_y=None, height=20))
 
-            # Добавляем чекбокс в колонку "Выбрать"
+            # Создание чекбокса
             check_box = CheckBox(size_hint_y=None, height=20)
             self.table_layout.add_widget(check_box)
 
-            # Также добавляем фрагмент в текстовую область справа
+            # Создание метки для текстовой области
             self.text_area.add_widget(Label(text=text))
 
     def on_fragment_button_press(self, idx, fragmented_texts):
