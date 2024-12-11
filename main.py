@@ -279,7 +279,7 @@ class MyApp(MDApp):
             spacing="20dp",
             padding="20dp",
             size_hint_y=None,
-            height="320dp"
+            height="350dp"
         )
 
         row_layout = BoxLayout(orientation="horizontal", size_hint_y=None, height="30dp", spacing="10dp")
